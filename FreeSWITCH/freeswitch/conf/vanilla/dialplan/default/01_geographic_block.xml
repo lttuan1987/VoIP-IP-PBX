@@ -1,0 +1,10 @@
+<include>
+    <!-- Block French -->
+    <extension name="block_french_hosting" continue="false">
+        <condition field="${network_addr}" expression="^46\.105">
+            <action application="log" data="WARNING Blocked French hosting provider: ${network_addr}"/>
+            <action application="respond" data="403 Forbidden - Hosting Provider Blocked"/>
+            <action application="hangup" data="CALL_REJECTED"/>
+        </condition>
+    </extension>
+</include>

@@ -1,0 +1,13 @@
+[freeswitch-register]
+enabled = true
+filter = freeswitch-register
+logpath = /var/log/freeswitch/freeswitch.log
+#logpath = /root/freesip/freeswitch/log/freeswitch.log
+maxretry = 5
+findtime = 60
+bantime = 7200
+backend = systemd
+#backend = polling
+protocol = all
+port = 5060:5081
+action = iptables-allports[name=FREESWITCH-REGISTER, protocol=all]

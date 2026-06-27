@@ -1,0 +1,12 @@
+<configuration name="xml_curl.conf" description="cURL XML Gateway">
+  <bindings>
+    <binding name="directory">
+      <param name="gateway-url" value="https://api-sb11.rpc.ziichat.dev/directory" bindings="directory"/>
+      <param name="method" value="POST"/>
+
+      <!-- <param name="gateway-credentials" value="muser:mypass"/> -->
+      <!-- <param name="auth-scheme" value="basic"/> -->
+
+    </binding>
+  </bindings>
+</configuration>

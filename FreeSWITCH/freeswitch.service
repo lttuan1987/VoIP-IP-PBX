@@ -1,0 +1,34 @@
+[Unit]
+Description=FreeSWITCH Softswitch
+Wants=network-online.target
+After=network.target network-online.target local-fs.target
+
+[Service]
+Type=forking
+PIDFile=/usr/local/freeswitch/run/freeswitch.pid
+
+# Flush inherited ExecStart
+ExecStart=
+ExecStart=/usr/local/freeswitch/bin/freeswitch -u freeswitch -g freeswitch -ncwait -rp
+
+Restart=on-failure
+TimeoutStartSec=45
+TimeoutStopSec=45
+UMask=0007
+
+User=freeswitch
+Group=freeswitch
+
+LimitCORE=infinity
+LimitNOFILE=100000
+LimitNPROC=60000
+LimitRTPRIO=infinity
+LimitRTTIME=7000000
+
+# Realtime CPU
+CPUSchedulingPolicy=rr
+CPUSchedulingPriority=89
+Nice=-19
+
+[Install]
+WantedBy=multi-user.target

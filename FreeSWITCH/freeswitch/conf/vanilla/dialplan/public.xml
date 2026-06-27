@@ -1,0 +1,38 @@
+<!-- http://wiki.freeswitch.org/wiki/Dialplan_XML -->
+<include>
+    <context name="public">
+
+        <extension name="unloop">
+            <condition field="${unroll_loops}" expression="^true$"/>
+            <condition field="${sip_looped_call}" expression="^true$">
+                <action application="deflect" data="${destination_number}"/>
+            </condition>
+        </extension>
+
+        <extension name="outside_call" continue="true">
+            <condition>
+                <action application="set" data="outside_call=true"/>
+                <action application="export" data="RFC2822_DATE=${strftime(%a, %d %b %Y %T %z)}"/>
+            </condition>
+        </extension>
+
+        <extension name="call_debug" continue="true">
+            <condition field="${call_debug}" expression="^true$" break="never">
+                <action application="info"/>
+            </condition>
+        </extension>
+
+        <extension name="test_extensions">
+            <condition field="destination_number" expression="^(77[01][0-9])$">
+                <action application="transfer" data="$1 XML default"/>
+            </condition>
+        </extension>
+
+        <extension name="ziichat_extensions">
+            <condition field="destination_number" expression="^(z.+)$">
+                <action application="transfer" data="$1 XML default"/>
+            </condition>
+        </extension>
+
+    </context>
+</include>

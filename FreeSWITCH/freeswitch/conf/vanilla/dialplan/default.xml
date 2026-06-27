@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    NOTICE:
+
+    This context is usually accessed via authenticated callers on the sip profile on port 5060
+    or transfered callers from the public context which arrived via the sip profile on port 5080.
+
+    Authenticated users will use the user_context variable on the user to determine what context
+    they can access.  You can also add a user in the directory with the cidr= attribute acl.conf.xml
+    will build the domains ACL using this value.
+-->
+<!-- http://wiki.freeswitch.org/wiki/Dialplan_XML -->
+<include>
+    <context name="default">
+        <extension name="unloop">
+            <condition field="${unroll_loops}" expression="^true$"/>
+            <condition field="${sip_looped_call}" expression="^true$">
+                <action application="deflect" data="${destination_number}"/>
+            </condition>
+        </extension>
+
+        <extension name="global" continue="true">
+            <condition field="${call_debug}" expression="^true$" break="never">
+                <action application="info"/>
+            </condition>
+
+            <condition field="${default_password}" expression="^1234$" break="never">
+                <action application="log" data="CRIT WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING "/>
+                <action application="log" data="CRIT Open $${conf_dir}/vars.xml and change the default_password."/>
+                <action application="log" data="CRIT Once changed type 'reloadxml' at the console."/>
+                <action application="log" data="CRIT WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING "/>
+                <action application="sleep" data="10000"/>
+            </condition>
+            <!--
+            This is an example of how to auto detect if telephone-event is missing and activate inband detection
+            -->
+            <!--
+            <condition field="${switch_r_sdp}" expression="a=rtpmap:(\d+)\stelephone-event/8000" break="never">
+            <action application="set" data="rtp_payload_number=$1"/>
+            <anti-action application="start_dtmf"/>
+            </condition>
+            -->
+            <condition field="${rtp_has_crypto}" expression="^($${rtp_sdes_suites})$" break="never">
+                <action application="set" data="rtp_secure_media=true"/>
+                <!-- Offer SRTP on outbound legs if we have it on inbound. -->
+                <!-- <action application="export" data="rtp_secure_media=true"/> -->
+            </condition>
+
+            <!--
+            Since we have inbound-late-negotation on by default now the
+            above behavior isn't the same so you have to do one extra step.
+            -->
+            <condition field="${endpoint_disposition}" expression="^(DELAYED NEGOTIATION)"/>
+            <condition field="${switch_r_sdp}" expression="(AES_CM_128_HMAC_SHA1_32|AES_CM_128_HMAC_SHA1_80)" break="never">
+                <action application="set" data="rtp_secure_media=true"/>
+                <!-- Offer SRTP on outbound legs if we have it on inbound. -->
+                <!-- <action application="export" data="rtp_secure_media=true"/> -->
+            </condition>
+
+            <condition>
+                <action application="hash" data="insert/${domain_name}-spymap/${caller_id_number}/${uuid}"/>
+                <action application="hash" data="insert/${domain_name}-last_dial/${caller_id_number}/${destination_number}"/>
+                <action application="hash" data="insert/${domain_name}-last_dial/global/${uuid}"/>
+                <action application="export" data="RFC2822_DATE=${strftime(%a, %d %b %Y %T %z)}"/>
+            </condition>
+        </extension>
+
+        <extension name="outgoing-call-test">
+            <condition field="destination_number" expression="^(77[01][0-9])$">
+                <action application="set" data="dialed_user=$1"/>
+                <action application="set" data="dialed_domain=$${domain}"/>
+                <action application="set" data="callee_contact=${sofia_contact(${dialed_user}@${dialed_domain})}"/>
+                
+                <condition field="${callee_contact}" expression="^$">
+                    <action application="log" data="INFO Callee ${dialed_user} is offline"/>
+                    <action application="lua" data="push_apn.lua ${dialed_user}"/>
+                </condition>
+            </condition>
+        </extension>
+
+        <extension name="test_extensions">
+            <condition field="destination_number" expression="^(77[01][0-9])$">
+                <action application="export" data="dialed_extension=$1"/>
+                <action application="set" data="ringback=${us-ring}"/>
+                <action application="set" data="transfer_ringback=$${hold_music}"/>
+                <action application="set" data="call_timeout=30"/>
+                <!-- <action application="set" data="sip_exclude_contact=${network_addr}"/> -->
+                <action application="set" data="hangup_after_bridge=true"/>
+                <!--<action application="set" data="continue_on_fail=NORMAL_TEMPORARY_FAILURE,USER_BUSY,NO_ANSWER,TIMEOUT,NO_ROUTE_DESTINATION"/> -->
+                <action application="set" data="continue_on_fail=true"/>
+                <!--<action application="export" data="nolocal:rtp_secure_media=${user_data(${dialed_extension}@${domain_name} var rtp_secure_media)}"/>-->
+                <action application="hash" data="insert/${domain_name}-last_dial/${called_party_callgroup}/${uuid}"/>
+                <action application="bridge" data="user/${dialed_extension}@${domain_name}"/>
+                <action application="answer"/>
+                <action application="sleep" data="1000"/>
+                <!-- <action application="bridge" data="loopback/app=voicemail:default ${domain_name} ${dialed_extension}"/> -->
+            </condition>
+        </extension>
+
+        <extension name="outgoing-call">
+            <condition field="destination_number" expression="^(z.+)$">
+                <action application="set" data="dialed_user=$1"/>
+                <action application="set" data="dialed_domain=$${domain}"/>
+                <action application="set" data="callee_contact=${sofia_contact(${dialed_user}@${dialed_domain})}"/>
+
+                <condition field="${callee_contact}" expression="^$">
+                    <action application="log" data="INFO Callee ${dialed_user} is offline"/>
+                    <action application="lua" data="push_apn.lua ${dialed_user}"/>
+                </condition>
+            </condition>
+        </extension>
+
+        <extension name="ziichat_extensions">
+            <condition field="destination_number" expression="^(z.+)$">
+                <action application="lua" data="exp_channel_uuid.lua"/>
+                <!-- <action application="lua" data="mod_notification.lua"/> -->
+                <action application="export" data="caller_extension=${caller_id_number}"/>
+                <action application="export" data="dialed_extension=$1"/>
+                <action application="set" data="ringback=${us-ring}"/>
+                <action application="set" data="transfer_ringback=$${hold_music}"/>
+                <action application="set" data="call_timeout=30"/>
+                <action application="set" data="hangup_after_bridge=true"/>
+                <action application="set" data="continue_on_fail=true"/>
+                <action application="bridge" data="user/${dialed_extension}@${domain_name}"/>
+                <action application="answer"/>
+                <action application="sleep" data="1000"/>
+            </condition>
+        </extension>
+        
+        <extension name="enum">
+            <condition field="${module_exists(mod_enum)}" expression="true"/>
+            <condition field="destination_number" expression="^(.*)$">
+                <action application="transfer" data="$1 enum"/>
+            </condition>
+        </extension>
+
+        <extension name="acknowledge_call">
+            <condition field="destination_number" expression="^(.*)$">
+                <action application="acknowledge_call"/>
+                <action application="ring_ready"/>
+                <action application="playback" data="$${hold_music}"/>
+            </condition>
+        </extension>        
+
+    </context>
+</include>
