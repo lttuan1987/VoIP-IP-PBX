@@ -44,7 +44,7 @@ Nội dung bao gồm:
 👉 Xem tài liệu:
 
 ```text
-freeswitch/README.md
+[FreeSWITCH/README.md](https://github.com/lttuan1987/VoIP-IP-PBX/blob/main/FreeSWITCH/README.md)
 ```
 
 ---
@@ -67,7 +67,7 @@ Tài liệu sẽ bao gồm:
 👉 Xem tài liệu:
 
 ```text
-asterisk/README.md
+[Asterisk-FreePBX/README.md](https://github.com/lttuan1987/VoIP-IP-PBX/blob/main/Asterisk-FreePBX/README.md)
 ```
 
 ---
@@ -90,7 +90,7 @@ Tài liệu sẽ bao gồm:
 👉 Xem tài liệu:
 
 ```text
-kamailio/README.md
+[Kamailio/README.md](https://github.com/lttuan1987/VoIP-IP-PBX/blob/main/Kamailo/README.md)
 ```
 
 ---
