@@ -134,3 +134,11 @@ Mọi đóng góp dưới dạng:
 ## License
 
 Repository này được phát hành theo **MIT License**.
+
+## Contact
+
+Nếu bạn có thắc mắc hoặc muốn hợp tác, hãy liên hệ với chúng tôi:
+
+- Email: lttuan1987@gmail.com
+- GitHub: https://github.com/lttuan1987
+- GitHub Page: https://lttuan1987.github.io
