@@ -22,7 +22,6 @@ iptables -A INPUT -p tcp --dport 7443 -j ACCEPT
 iptables -A INPUT -p tcp --dport 8081 -j ACCEPT
 iptables -A INPUT -p tcp --dport 8082 -j ACCEPT
 iptables -A INPUT -p tcp --dport 5432 -j ACCEPT
-iptables -A INPUT -p tcp --dport 23465 -j ACCEPT
 
 iptables -A INPUT -p udp --dport 3478 -j ACCEPT
 
